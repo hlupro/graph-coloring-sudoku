@@ -4,11 +4,10 @@
 #include <iostream>
 #include <map>
 #include <vector>
-#include <queue>
 #include <cmath>
 #include <iomanip>
 #include <fstream>
-#include <vector>
+#include <chrono>
 
 
 class Graph{
@@ -29,9 +28,11 @@ public:
   void ColorGreedy(); //A simple greedy algorithm that colors the graph
   void ColorBackTrack();
   void easyHint();
+  void intermediateHint();
   void hardHint();
   void addUnknowns();
-  void Recurse(int i);
+  void Recurse(int i, int stop);
+  int numHints();
 };
 
 #endif

@@ -175,45 +175,100 @@ void Graph :: ColorGreedy()  {
 }
 
 void Graph :: ColorBackTrack() {
-  int i = 0;
-  Recurse(i);
-}
-
-void Graph :: Recurse(int i) {
-  if(i == -1) {
-    std::cout << "Error: No Solution Found" << std::endl;
-    return;
-  }
-  if(i == unknowns.size()) {
-    return;
-  }
-  std::cout << i << std::endl;
-  // if(i == 19) {
-  //   return;
-  // }
-  auto it = color.find(unknowns[i]); //returns an iterator pointing to the location where color is stored
-  auto v = vertices.find(unknowns[i]); //points to the current vertex's adjacency list
-  int c = it->second+1; //current color of unknown at v[i];
-  bool sameColor = true;
-  while(sameColor != false) {
-    sameColor = false;
-    for(int n : v->second) {
-      if(color[n] == c) {
-        sameColor = true;
+  for(int i = 0; i < unknowns.size(); i++) {
+    auto it = color.find(unknowns[i]); //returns an iterator pointing to the location where color is stored
+    auto v = vertices.find(unknowns[i]); //points to the current vertex's adjacency list
+    int c = it->second+1; //current color of unknown at v[i];
+    bool sameColor = true;
+    while(sameColor != false) {
+      sameColor = false;
+      for(int n : v->second) {
+        if(color[n] == c) {
+          sameColor = true;
+        }
+      }
+      if(sameColor) {
+        c++;
       }
     }
-    if(sameColor) {
-      c++;
+    if(c > 9) {
+      color[unknowns[i]] = 0;
+      Recurse(i-1, i+1); //if no number fits go back to previous and try next option
+    }
+    else {
+      color[unknowns[i]] = c;
     }
   }
-  if(c > 9) {
-    //std::cout << i << std::endl;
-    color[unknowns[i]] = 0;
-    Recurse(i-1); //if no number fits go back to previous and try next option
+}
+
+// void Graph :: Recurse(int i, int stop) {
+//   if(i == -1) {
+//     std::cout << "Error: No Solution Found" << std::endl;
+//     return;
+//   }
+//   if(i == unknowns.size()) {
+//     return;
+//   }
+//   std::cout << i << std::endl;
+//   // if(i == 19) {
+//   //   return;
+//   // }
+//   auto it = color.find(unknowns[i]); //returns an iterator pointing to the location where color is stored
+//   auto v = vertices.find(unknowns[i]); //points to the current vertex's adjacency list
+//   int c = it->second+1; //current color of unknown at v[i];
+//   bool sameColor = true;
+//   while(sameColor != false) {
+//     sameColor = false;
+//     for(int n : v->second) {
+//       if(color[n] == c) {
+//         sameColor = true;
+//       }
+//     }
+//     if(sameColor) {
+//       c++;
+//     }
+//   }
+//   if(c > 9) {
+//     //std::cout << i << std::endl;
+//     color[unknowns[i]] = 0;
+//     Recurse(i-1); //if no number fits go back to previous and try next option
+//   }
+//   else {
+//     color[unknowns[i]] = c;
+//     Recurse(i+1);
+//   }
+// }
+
+void Graph :: Recurse(int i, int stop) {
+  if(i == -1) {
+    std::cout << "Error: No Solution Found" << std::endl;
   }
-  else {
-    color[unknowns[i]] = c;
-    Recurse(i+1);
+
+  while(i != stop) {
+    auto it = color.find(unknowns[i]); //returns an iterator pointing to the location where color is stored
+    auto v = vertices.find(unknowns[i]); //points to the current vertex's adjacency list
+    int c = it->second+1; //current color of unknown at v[i];
+    bool sameColor = true;
+    while(sameColor != false) {
+      sameColor = false;
+      for(int n : v->second) {
+        if(color[n] == c) {
+          sameColor = true;
+        }
+      }
+      if(sameColor) {
+        c++;
+      }
+    }
+    if(c > 9) {
+      //std::cout << i << std::endl;
+      color[unknowns[i]] = 0;
+      i--; //if no number fits go back to previous and try next option
+    }
+    else {
+      color[unknowns[i]] = c;
+      i++;
+    }
   }
 }
 
@@ -224,6 +279,17 @@ void Graph :: easyHint() {
     inFile >> color[i];
   }
   inFile.close();
+  addUnknowns();
+}
+
+void Graph :: intermediateHint() {
+  std::ifstream inFile;
+  inFile.open("hint2.txt");
+  for(int i = 1; i <= 81; i++) {
+    inFile >> color[i];
+  }
+  inFile.close();
+  addUnknowns();
 }
 
 void Graph :: hardHint() {
@@ -233,6 +299,11 @@ void Graph :: hardHint() {
     inFile >> color[i];
   }
   inFile.close();
+  addUnknowns();
+}
+
+int Graph :: numHints() {
+  return unknowns.size();
 }
 
 void Graph :: addUnknowns() {
@@ -241,7 +312,4 @@ void Graph :: addUnknowns() {
       unknowns.push_back(it->first);
     }
   }
-  // for(int n : unknowns) {
-  //   std::cout << n << std::endl;
-  // }
 }
