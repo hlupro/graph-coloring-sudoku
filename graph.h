@@ -6,22 +6,32 @@
 #include <vector>
 #include <queue>
 #include <cmath>
+#include <iomanip>
+#include <fstream>
+#include <vector>
+
 
 class Graph{
 private:
   /* will map an int to a list of its neighbors */
-  enum color_t {white, grey, black}; //enum declared to keep track of colors
   std::map<int, std::vector<int>> vertices; //adjacency list using vector class
-  std::map<int, color_t> color;
+  std::map<int, int> color;
+  std::vector<int> unknowns;
+  int dimension;
 
 public:
   Graph(int n);
-  void populate(); //Creates a graph predetermined graph
   void addVertex(int x); // add a vertex to the graph
   void addEdge(int x, int y); // add an undirected edge to the graph
   void print(); // prints the adjacency list of each vertex, to show the structure
-  void printBfs(int); // prints the vertices discovered by a BFS, starting at a given vertex
-  void connectSquare(int x, int sqr, int n);
+  void printBoard(); //Prints the color of each vertex in a Sudoku board format
+  void connectSquare(int x, int sqr, int n); //
+  void ColorGreedy(); //A simple greedy algorithm that colors the graph
+  void ColorBackTrack();
+  void easyHint();
+  void hardHint();
+  void addUnknowns();
+  void Recurse(int i);
 };
 
 #endif

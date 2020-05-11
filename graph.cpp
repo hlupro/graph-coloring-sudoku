@@ -1,6 +1,7 @@
 #include "graph.h"
 
 Graph :: Graph(int n) {
+  dimension = n;
   for(int i = 1; i <=(n*n); i++) { //adds n^2 vertices to the graph
     addVertex(i);
   }
@@ -65,7 +66,7 @@ void Graph :: addVertex(int x) {
 
   std::vector<int> neighbors; //if not found initalize an empty vector
   vertices.insert({x, neighbors}); //insert x and its empty vector into the map
-  color.insert({x, white});
+  color.insert({x, 0});
   }
   else {
     std::cout << "Vertex " << x << " is already in the graph."  << "\n"<< std::endl; //if already found print statement
@@ -110,59 +111,137 @@ void Graph :: print() { //Prints a vertex, and all of its neighbors
   }
 }
 
-void Graph :: printBfs(int x) { //performs a BFs starting on vertex x if it exists
-  std::cout << "//Beginning a BFS starting at vertex " << x  << "//"<< std::endl;
-  if(vertices.find(x) != vertices.end()) { //Checks if x is a vertex in the graph
+//Prints the graph in the shape of a Sudoku board
+void Graph :: printBoard() { //Prints a vertex, and all of its neighbors
+  int h = 0; //variables to keep track of position in order to print a new line or vertical line
+  int v = 0;
+  int z = 0; //responsible for printing new line after n vertices are printed
+  int s = sqrt(dimension);
+  std::cout << std::setfill('-') << std::setw(3*(dimension+s-1)) << "-" << std::endl;
+  std::cout << std::setfill(' ');
+  for(auto it = color.begin(); it != color.end(); it++) { //For loop is set to the first vertex in the map
+    h++;
+    z++;
 
-    enum color_t {white, grey, black}; //enum declared to keep track of colors
-
-    std::map<int, color_t> color; //map for color
-    std::map<int, int> parent; //map for parent
-    std::map<int, int> distance; //map for distance
-    std::queue<int> q; //Will keep track of visted vertices
-
-    for(auto it = vertices.begin(); it != vertices.end(); it++) { //initalizing all vertex colors to be white,
-      color.insert({it->first, white});
+    std::cout << std::setw(3) << std::left;
+    std::cout << it->second;
+    if(z == dimension) {
+      v++;
+      z = 0;
+      std::cout << std::endl;
+      h = 0;
+    }
+    if(h == s) {
+      std::cout << std::setw(3)  << std::left;
+      std::cout << "|";
+      h = 0;
+    }
+    if(v == s) {
+      std::cout << std::setfill('-') << std::setw(3*(dimension+s-1)) << "-" << std::endl;
+      std::cout << std::setfill(' ');
+      v = 0;
     }
 
-    color[x] = grey; //starting node is marked as visited
-    distance.insert({x, 0});
-    q.push(x); //inserted into queue
 
-    while(!q.empty()) {
-      bool neighbors = false; //bool used for print statement
-      int u = q.front();
-      q.pop();
-      std::cout << "Vertex: " << u << std::endl;
-      if(parent.find(u) != parent.end()) { //if not found in parent map it must be the starting node
-        std::cout << "Parent: " << parent[u] << std::endl;
-      }
-      else {
-        std::cout << u << " is the starting vertex." << std::endl;
-      }
-      std::cout << "Distance: " << distance[u] << std::endl;
-      std::cout << "Unvisited Neighboring Vertices: ";
-      auto it = vertices.find(u); //iterator set to u's position in map
-      for(int n : it->second) { //iteratates through u's neighbors and marking them grey
-        if(color[n] == white) { //if any white vertices are found find their distance, color them grey and mark their parent as u
-          neighbors = true;
-          color[n] = grey;
-          distance.insert({n, distance[u] +1});
-          parent.insert({n, u});
-          q.push(n); //insert into queue
-          std::cout << n << " ";
+  }
+  std::cout << std::endl;
+}
+
+//Takes the graph and attempts to color a Sudoku solution, //Iterates through each vertex and labels the smallest value of c possibe
+//if an adjacent vertex has that color n, c is incremented to the next color and the loop runs again
+//Assigns vertices colors from left to right top to bottom in a sudoku board
+//Doesnt work for 3x3
+//Need to create one that invloves the use of backtracking
+void Graph :: ColorGreedy()  {
+  for(auto it = vertices.begin(); it != vertices.end(); it++) {
+    int c = 1;
+    int v = it->first;
+    bool sameColor = true;
+    if(color[v] == 0) {
+      while(sameColor != false) {
+        sameColor = false;
+        for(int n : it->second) {
+          if(color[n] == c) {
+            sameColor = true;
+          }
         }
-
-        color[u] = black; //u is now fully explored
+        if(sameColor) {
+          c++;
+        }
       }
-      if(!neighbors) {
-        std::cout << "None.";
-      }
-      std::cout << "\n" << std::endl;
+      color[it->first] = c;
     }
   }
-  else //if x is not in the graph print out an error message
-  {
-    std::cout << "Error. Cannot do a BFS because " << x << " is not a vertex in the graph." << "\n" << std::endl;
+}
+
+void Graph :: ColorBackTrack() {
+  int i = 0;
+  Recurse(i);
+}
+
+void Graph :: Recurse(int i) {
+  if(i == -1) {
+    std::cout << "Error: No Solution Found" << std::endl;
+    return;
   }
+  if(i == unknowns.size()) {
+    return;
+  }
+  std::cout << i << std::endl;
+  // if(i == 19) {
+  //   return;
+  // }
+  auto it = color.find(unknowns[i]); //returns an iterator pointing to the location where color is stored
+  auto v = vertices.find(unknowns[i]); //points to the current vertex's adjacency list
+  int c = it->second+1; //current color of unknown at v[i];
+  bool sameColor = true;
+  while(sameColor != false) {
+    sameColor = false;
+    for(int n : v->second) {
+      if(color[n] == c) {
+        sameColor = true;
+      }
+    }
+    if(sameColor) {
+      c++;
+    }
+  }
+  if(c > 9) {
+    //std::cout << i << std::endl;
+    color[unknowns[i]] = 0;
+    Recurse(i-1); //if no number fits go back to previous and try next option
+  }
+  else {
+    color[unknowns[i]] = c;
+    Recurse(i+1);
+  }
+}
+
+void Graph :: easyHint() {
+  std::ifstream inFile;
+  inFile.open("hint.txt");
+  for(int i = 1; i <= 81; i++) {
+    inFile >> color[i];
+  }
+  inFile.close();
+}
+
+void Graph :: hardHint() {
+  std::ifstream inFile;
+  inFile.open("hint3.txt");
+  for(int i = 1; i <= 81; i++) {
+    inFile >> color[i];
+  }
+  inFile.close();
+}
+
+void Graph :: addUnknowns() {
+  for(auto it = color.begin(); it != color.end(); it++) {
+    if(it->second == 0) {
+      unknowns.push_back(it->first);
+    }
+  }
+  // for(int n : unknowns) {
+  //   std::cout << n << std::endl;
+  // }
 }
