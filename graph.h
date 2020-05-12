@@ -14,9 +14,9 @@ class Graph{
 private:
   /* will map an int to a list of its neighbors */
   std::map<int, std::vector<int>> vertices; //adjacency list using vector class
-  std::map<int, int> color;
-  std::vector<int> unknowns;
-  int dimension;
+  std::map<int, int> color; //map that maps two ints, the first int is the vertex and the second is the color
+  std::vector<int> unknowns; //A vector of all vertices whose coloring is zero
+  int dimension; //int that is the dimension of the puzzle ie a 9x9
 
 public:
   Graph(int n);
@@ -27,12 +27,12 @@ public:
   void connectSquare(int x, int sqr, int n); //
   void ColorGreedy(); //A simple greedy algorithm that colors the graph
   void ColorBackTrack();
-  void easyHint();
-  void intermediateHint();
-  void hardHint();
-  void addUnknowns();
-  void Recurse(int i, int stop);
-  int numHints();
+  void easyHint(); //precolors the graph to match an easy sudoku puzzle
+  void intermediateHint(); //precolors the graph to match an intermediate sudoku puzzle
+  void hardHint(); //precolors the graph to match a hard sudoku puzzle
+  void addUnknowns(); //Populates the vector unknowns with all the vertices who's color is 0.
+  void backtrack(int i, int stop);
+  int numHints(); //returns the number of hints a sudoku puzzle begins with
 };
 
 #endif

@@ -174,6 +174,14 @@ void Graph :: ColorGreedy()  {
   }
 }
 
+//Graph coloring algorithm that iterates through a vector that contains every uncolored vertex in the graph
+//In each loop two iterators are set to the correspond adjacency list map container vertices and color map color
+//int c will designate the starting color that the algorithm will try to color the vertex located at unknowns[i]
+//if color[i] is zero, c will be one.
+//A while loop runs that stops as soon as c is not the same color as any vertex in the adjacency list
+//if c is greater than 9 that means that a coloring couldnt be found for that vertex and the vertex is colored 0 and then
+//backtrack is called to go down the vector towards the beginning of the vector and fix any potential coloring errors by trying
+//new color values
 void Graph :: ColorBackTrack() {
   for(int i = 0; i < unknowns.size(); i++) {
     auto it = color.find(unknowns[i]); //returns an iterator pointing to the location where color is stored
@@ -187,13 +195,13 @@ void Graph :: ColorBackTrack() {
           sameColor = true;
         }
       }
-      if(sameColor) {
+      if(sameColor) { //if any vertex in the adjacency list has the color c, that color is taken and c is incremented
         c++;
       }
     }
     if(c > 9) {
       color[unknowns[i]] = 0;
-      Recurse(i-1, i+1); //if no number fits go back to previous and try next option
+      backtrack(i-1, i+1); //if no number fits go back to previous and try next option
     }
     else {
       color[unknowns[i]] = c;
@@ -201,45 +209,11 @@ void Graph :: ColorBackTrack() {
   }
 }
 
-// void Graph :: Recurse(int i, int stop) {
-//   if(i == -1) {
-//     std::cout << "Error: No Solution Found" << std::endl;
-//     return;
-//   }
-//   if(i == unknowns.size()) {
-//     return;
-//   }
-//   std::cout << i << std::endl;
-//   // if(i == 19) {
-//   //   return;
-//   // }
-//   auto it = color.find(unknowns[i]); //returns an iterator pointing to the location where color is stored
-//   auto v = vertices.find(unknowns[i]); //points to the current vertex's adjacency list
-//   int c = it->second+1; //current color of unknown at v[i];
-//   bool sameColor = true;
-//   while(sameColor != false) {
-//     sameColor = false;
-//     for(int n : v->second) {
-//       if(color[n] == c) {
-//         sameColor = true;
-//       }
-//     }
-//     if(sameColor) {
-//       c++;
-//     }
-//   }
-//   if(c > 9) {
-//     //std::cout << i << std::endl;
-//     color[unknowns[i]] = 0;
-//     Recurse(i-1); //if no number fits go back to previous and try next option
-//   }
-//   else {
-//     color[unknowns[i]] = c;
-//     Recurse(i+1);
-//   }
-// }
-
-void Graph :: Recurse(int i, int stop) {
+//Similar to ColorBackTrack this function breaks down the vector unknowns into a range of 0 to the int stop.
+//If i can not find a valid coloring, the loop iterates up the vector until a coloring is accepted and then the
+//vertices down the vector are attempted to be colored again. This stops until i is equal to the stop index which is designated
+//above
+void Graph :: backtrack(int i, int stop) {
   if(i == -1) {
     std::cout << "Error: No Solution Found" << std::endl;
   }
@@ -256,22 +230,23 @@ void Graph :: Recurse(int i, int stop) {
           sameColor = true;
         }
       }
-      if(sameColor) {
+      if(sameColor) { //if any vertex in the adjacency list has the color c, that color is taken and c is incremented
         c++;
       }
     }
-    if(c > 9) {
-      //std::cout << i << std::endl;
+    if(c > 9) { //if a coloring wasn't found iterate up the vector towards the start
       color[unknowns[i]] = 0;
-      i--; //if no number fits go back to previous and try next option
+      i--;
     }
-    else {
+    else { //if a coloring was found move down the vector towards the stopping point
       color[unknowns[i]] = c;
       i++;
     }
   }
 }
 
+//Reads in from hint3.txt which contains an easy sudoku puzzle.
+//Puzzle was found on https://dingo.sbs.arizona.edu
 void Graph :: easyHint() {
   std::ifstream inFile;
   inFile.open("hint.txt");
@@ -282,6 +257,8 @@ void Graph :: easyHint() {
   addUnknowns();
 }
 
+//Reads in from hint3.txt which contains an Intermediate sudoku puzzle.
+//Puzzle was found on https://dingo.sbs.arizona.edu
 void Graph :: intermediateHint() {
   std::ifstream inFile;
   inFile.open("hint2.txt");
@@ -292,6 +269,8 @@ void Graph :: intermediateHint() {
   addUnknowns();
 }
 
+//Reads in from hint3.txt which contains a very difficult sudoku puzzle.
+//Puzzle was found on https://dingo.sbs.arizona.edu
 void Graph :: hardHint() {
   std::ifstream inFile;
   inFile.open("hint3.txt");
@@ -302,13 +281,16 @@ void Graph :: hardHint() {
   addUnknowns();
 }
 
+//Returns the number of hints each sudoku puzzle has.
 int Graph :: numHints() {
-  return unknowns.size();
+  return 81-unknowns.size();
 }
 
+//Creates a vector that holds all the vertices that are uncolored.
+//This vector is used to find solutions to the sudoku puzzle given without altering the vertices already colored
 void Graph :: addUnknowns() {
   for(auto it = color.begin(); it != color.end(); it++) {
-    if(it->second == 0) {
+    if(it->second == 0) { //every vertex uncolored is added to the vector
       unknowns.push_back(it->first);
     }
   }
